@@ -1,0 +1,13 @@
+{
+  "name": "Gamecraft 2017",
+  "website": "https://github.com/jorgebg/gamecraft-2017",
+  "repository": "https://github.com/jorgebg/gamecraft-2017",
+  "success_url": "/",
+  "scripts": {
+  },
+  "addons": [
+  ],
+  "env": {
+    "BUILDPACK_URL": "https://github.com/heroku/heroku-buildpack-nodejs"
+  }
+}

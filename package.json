@@ -1,0 +1,16 @@
+{
+  "name": "gamecraft-2017",
+  "version": "0.0.1",
+  "description": "Gamecraft 2017",
+  "dependencies": {
+    "express": "^4.16.2",
+    "jquery": "^3.2.1",
+    "phaser": "^2.6.2",
+    "socket.io": "^2.0.4",
+    "socket.io-client": "^2.0.4"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "license": "GNU GPL-3.0"
+}
