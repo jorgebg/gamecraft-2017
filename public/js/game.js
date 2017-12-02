@@ -69,55 +69,12 @@ function update() {
       playerSprite.text.y = playerState.y - 48;
     }
 
-    //
-    // game.physics.arcade.collide(player, layer);
-    //
-    // player.body.velocity.x = 0;
-    //
-    // if (cursors.left.isDown)
-    // {
-    //     player.body.velocity.x = -150;
-    //
-    //     if (facing != 'left')
-    //     {
-    //         player.animations.play('left');
-    //         facing = 'left';
-    //     }
-    // }
-    // else if (cursors.right.isDown)
-    // {
-    //     player.body.velocity.x = 150;
-    //
-    //     if (facing != 'right')
-    //     {
-    //         player.animations.play('right');
-    //         facing = 'right';
-    //     }
-    // }
-    // else
-    // {
-    //     if (facing != 'idle')
-    //     {
-    //         player.animations.stop();
-    //
-    //         if (facing == 'left')
-    //         {
-    //             player.frame = 0;
-    //         }
-    //         else
-    //         {
-    //             player.frame = 5;
-    //         }
-    //
-    //         facing = 'idle';
-    //     }
-    // }
-    //
-    // if (cursors.up.isDown && player.body.onFloor() && game.time.now > jumpTimer)
-    // {
-    //     player.body.velocity.y = -250;
-    //     jumpTimer = game.time.now + 750;
-    // }
+    for (let id in players) {
+      if (!(id in state.players)) {
+        removePlayer(id);
+      }
+    }
+
 
 }
 
@@ -155,6 +112,11 @@ function getOrCreatePlayer(id, playerState) {
   }
 }
 
+function removePlayer(id) {
+    players[id].text.destroy();
+    players[id].destroy();
+    delete players[id];
+}
 
 var keysdown = {
   'ArrowUp': false,
