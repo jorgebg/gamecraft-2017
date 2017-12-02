@@ -8,7 +8,11 @@ function preload() {
 
 var player;
 var starfield;
-var cursors;
+var state = {
+  'players': {}
+};
+var players = {};
+var playerCollisionGroup;
 
 function create() {
 
@@ -21,7 +25,7 @@ function create() {
     game.physics.p2.restitution = 0.8;
 
     //  Create our collision groups
-    var playerCollisionGroup = game.physics.p2.createCollisionGroup();
+    playerCollisionGroup = game.physics.p2.createCollisionGroup();
 
     //  This part is vital if you want the objects with their own collision groups to still collide with the world bounds
     //  (which we do) - what this does is adjust the bounds to use its own collision group.
@@ -30,27 +34,11 @@ function create() {
     starfield = game.add.tileSprite(0, 0, 800, 600, 'stars');
     starfield.fixedToCamera = true;
 
-    //  Create our player sprite
-    player = game.add.sprite(200, 200, 'ship');
-    player.scale.set(2);
-    player.smoothed = false;
-    player.animations.add('fly', [0,1,2,3,4,5], 10, true);
-    player.play('fly');
 
-    game.physics.p2.enable(player, false);
-    player.body.setCircle(28);
-    player.body.fixedRotation = true;
 
-    var style = { font: "12px Arial", fill: "#fff", align: "center"};
-    player.text = game.add.text(0, 0, "Player 1", style);
-
-    //  Set the players collision group
-    player.body.setCollisionGroup(playerCollisionGroup);
-
-    game.camera.follow(player);
-
-    cursors = game.input.keyboard.createCursorKeys();
-
+    socket.on('state', function(nextState){
+      state = nextState;
+    });
 
     server = {
       'player': {
@@ -65,10 +53,22 @@ function create() {
 }
 
 function update() {
-    game.physics.arcade.moveToXY(player, server.player.x, server.player.y, 30, 30);
-    // game.physics.arcade.moveToXY(player.text, server.player.x, server.player.y - player.height, 30, 30);
-    player.text.x = server.player.x - player.text.width/2;
-    player.text.y = server.player.y - 48;
+    var playerSprite;
+    var playerState;
+
+    for (let id in state.players) {
+      let playerState = state.players[id];
+      let playerSprite = getOrCreatePlayer(id, playerState);
+
+      game.physics.arcade.moveToXY(playerSprite, playerState.x, playerState.y, 30, 30);
+      // game.physics.arcade.moveToXY(player.text, server.player.x, server.player.y - player.height, 30, 30);
+      if (playerSprite.text.text != playerState.name) {
+        playerSprite.text.text = playerState.name;
+      }
+      playerSprite.text.x = playerState.x - playerSprite.text.width/2;
+      playerSprite.text.y = playerState.y - 48;
+    }
+
     //
     // game.physics.arcade.collide(player, layer);
     //
@@ -127,6 +127,32 @@ function render () {
     // game.debug.body(player);
     // game.debug.bodyInfo(player, 16, 24);
 
+}
+
+function getOrCreatePlayer(id, playerState) {
+  if (id in players) {
+    return players[id];
+  } else {
+    playerSprite = game.add.sprite(playerState.x, playerState.y, 'ship');
+    playerSprite.scale.set(2);
+    playerSprite.smoothed = false;
+    playerSprite.animations.add('fly', [0,1,2,3,4,5], 10, true);
+    playerSprite.play('fly');
+
+    game.physics.p2.enable(playerSprite, false);
+    playerSprite.body.setCircle(28);
+    playerSprite.body.fixedRotation = true;
+
+    var style = { font: "12px Arial", fill: "#fff", align: "center"};
+    playerSprite.text = game.add.text(0, 0, playerState.name, style);
+
+    //  Set the players collision group
+    playerSprite.body.setCollisionGroup(playerCollisionGroup);
+
+    // game.camera.follow(player);
+    players[id] = playerSprite;
+    return playerSprite;
+  }
 }
 
 
