@@ -9,6 +9,11 @@ $(function () {
   $('form.message').submit(function(){
     var msg = $('#message').val();
     if (msg) {
+      if (msg == '/addbot') {
+        addBot();
+      } else if (msg == '/removebot') {
+        kickBot();
+      }
       socket.emit('chat message', msg);
       $('#message').val('');
     }

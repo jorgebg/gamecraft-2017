@@ -3,7 +3,7 @@ var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'game', { preload: preload, 
 
 function preload() {
     // Leep running when losing focus
-    game.disableVisibilityChange = true;
+    // game.disableVisibilityChange = true;
 
     game.load.image('stars', 'assets/starfield.jpg');
     game.load.spritesheet('ship', 'assets/humstar.png', 32, 32);
@@ -13,7 +13,8 @@ function preload() {
 var player;
 var starfield;
 var state = {
-  'players': {}
+  'players': {},
+  'fields': {},
 };
 var players = {};
 var playerCollisionGroup;
@@ -24,9 +25,7 @@ var keysdown = {
   'ArrowLeft': false,
   'ArrowRight': false,
 };
-
-var BOT = false;
-var BOT_TARGET_ID = false;
+var bots = [];
 
 function create() {
 
@@ -51,17 +50,6 @@ function create() {
 
     socket.on('state', function(nextState){
       state = nextState;
-    });
-
-    server = {
-      'player': {
-        'x': 200,
-        'y': 200,
-      }
-    }
-    socket.on('position', function(x, y){
-      server.player.x = x;
-      server.player.y = y;
     });
 }
 
@@ -97,6 +85,7 @@ function update() {
       fieldSprite.x = fieldState.x-fieldState.radius;
       fieldSprite.y = fieldState.y-fieldState.radius;
       // game.physics.arcade.moveToXY(fieldSprite, fieldState.x, fieldState.y, 30, 30);
+      game.world.bringToTop(fieldSprite);
     }
 
     for (let id in fields) {
@@ -105,6 +94,9 @@ function update() {
       }
     }
 
+    for (let bot of bots) {
+      bot.updateBot();
+    }
 }
 
 function render () {
@@ -164,14 +156,10 @@ function getOrCreateField(id, fieldState) {
     // fieldSprite.scale.setTo(fieldState.radius * 2, fieldState.radius * 2);
 
     fieldSprite.scale.set((radius * 2)/32);
-    fieldSprite.smoothed = false;
-    // fieldSprite.animations.add('fly', [0,1,2,3,4,5], 10, true);
-    // fieldSprite.play('fly');
+    fieldSprite.alpha = 0;
+    // fieldSprite.smoothed = false;
 
-    // game.physics.p2.enable(fieldSprite, false);
-    // fieldSprite.body.setCircle(fieldState.radius * 2);
-    // fieldSprite.body.fixedRotation = true;
-    // fieldSprite.body.collisionResponse = false;
+    game.add.tween(fieldSprite).to( { alpha: 1 }, 500, Phaser.Easing.Linear.None, true);
 
     fields[id] = fieldSprite;
     return fieldSprite;
@@ -182,8 +170,6 @@ function removeField(id) {
     fields[id].destroy();
     delete fields[id];
 }
-
-
 
 
 
@@ -202,72 +188,3 @@ document.addEventListener('keyup', function(evt) {
     socket.emit('keyup', evt.key);
   }
 }, false);
-
-
-
-function autopilot() {
-    if (BOT) {
-      let playerState = state.players[socket.id];
-      let targetField;
-      if (BOT_TARGET_ID in state.fields) {
-        targetField = state.fields[BOT_TARGET_ID];
-      } else {
-        let fieldIds = Object.keys(state.fields);
-        BOT_TARGET_ID = fieldIds[Math.floor(Math.random()*fieldIds.length)];
-        targetField = state.fields[BOT_TARGET_ID];
-      }
-      // let targetField = false;
-      // let targetDistance = -1;
-      // for (let id in state.fields) {
-      //   let fieldState = state.fields[id];
-      //   let distance = Math.sqrt(Math.pow(fieldState.x-playerState.x, 2), Math.pow(fieldState.y-playerState.y, 2));
-      //   if (targetDistance === -1 || distance < targetDistance) {
-      //     console.log(distance);
-      //     targetField = fieldState;
-      //   }
-      // }
-      let keys = [];
-      if (targetField) {
-        let threshold = Math.sqrt(targetField.radius);
-        if (targetField.x < playerState.x - threshold) {
-          keys.push('ArrowLeft');
-        } else if (targetField.x > playerState.x + threshold) {
-          keys.push('ArrowRight');
-        } else {
-          // console.log('STOP X');
-        }
-        if (targetField.y < playerState.y - threshold) {
-          keys.push('ArrowUp');
-        } else if (targetField.y > playerState.y + threshold) {
-          keys.push('ArrowDown');
-        } else {
-            // console.log('STOP Y');
-        }
-      }
-      for (key in keysdown) {
-        let press = keys.indexOf(key) !== -1;
-        if(!press && keysdown[key]) {
-          keysdown[key] = false;
-          socket.emit('keyup', key);
-          // console.log('keyup', key);
-        } else if(press && !keysdown[key]) {
-          keysdown[key] = true;
-          socket.emit('keydown', key);
-          // console.log('keydown', key);
-        }
-      }
-    }
-}
-
-$(function () {
-  var refreshIntervalId;
-  $("#autopilot").change(function() {
-      if(this.checked) {
-          BOT = true;
-          var refreshIntervalId = setInterval(autopilot, 10);
-      } else {
-          BOT = false;
-          clearInterval(refreshIntervalId);
-      }
-  });
-});
