@@ -2,6 +2,9 @@
 var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'game', { preload: preload, create: create, update: update, render: render });
 
 function preload() {
+    // Leep running when losing focus
+    game.disableVisibilityChange = true;
+
     game.load.image('stars', 'assets/starfield.jpg');
     game.load.spritesheet('ship', 'assets/humstar.png', 32, 32);
     game.load.image('particle_small', 'assets/particle_small.png');
@@ -15,12 +18,20 @@ var state = {
 var players = {};
 var playerCollisionGroup;
 var fields = {};
+var keysdown = {
+  'ArrowUp': false,
+  'ArrowDown': false,
+  'ArrowLeft': false,
+  'ArrowRight': false,
+};
+
+var BOT = false;
+var BOT_TARGET_ID = false;
 
 function create() {
 
     //  Enable P2
     game.physics.startSystem(Phaser.Physics.P2JS);
-
     //  Turn on impact events for the world, without this we get no collision callbacks
     game.physics.p2.setImpactEvents(true);
 
@@ -176,23 +187,87 @@ function removeField(id) {
 
 
 
-var keysdown = {
-  'ArrowUp': false,
-  'ArrowDown': false,
-  'ArrowLeft': false,
-  'ArrowRight': false,
-};
-
 document.addEventListener('keydown', function(evt) {
   if(evt.key in keysdown && !(keysdown[evt.key])) {
+    evt.preventDefault();
     keysdown[evt.key] = true;
     socket.emit('keydown', evt.key);
   }
-});
+}, false);
 
 document.addEventListener('keyup', function(evt) {
   if(evt.key in keysdown && keysdown[evt.key]) {
+    evt.preventDefault();
     keysdown[evt.key] = false;
     socket.emit('keyup', evt.key);
   }
+}, false);
+
+
+
+function autopilot() {
+    if (BOT) {
+      let playerState = state.players[socket.id];
+      let targetField;
+      if (BOT_TARGET_ID in state.fields) {
+        targetField = state.fields[BOT_TARGET_ID];
+      } else {
+        let fieldIds = Object.keys(state.fields);
+        BOT_TARGET_ID = fieldIds[Math.floor(Math.random()*fieldIds.length)];
+        targetField = state.fields[BOT_TARGET_ID];
+      }
+      // let targetField = false;
+      // let targetDistance = -1;
+      // for (let id in state.fields) {
+      //   let fieldState = state.fields[id];
+      //   let distance = Math.sqrt(Math.pow(fieldState.x-playerState.x, 2), Math.pow(fieldState.y-playerState.y, 2));
+      //   if (targetDistance === -1 || distance < targetDistance) {
+      //     console.log(distance);
+      //     targetField = fieldState;
+      //   }
+      // }
+      let keys = [];
+      if (targetField) {
+        let threshold = Math.sqrt(targetField.radius);
+        if (targetField.x < playerState.x - threshold) {
+          keys.push('ArrowLeft');
+        } else if (targetField.x > playerState.x + threshold) {
+          keys.push('ArrowRight');
+        } else {
+          // console.log('STOP X');
+        }
+        if (targetField.y < playerState.y - threshold) {
+          keys.push('ArrowUp');
+        } else if (targetField.y > playerState.y + threshold) {
+          keys.push('ArrowDown');
+        } else {
+            // console.log('STOP Y');
+        }
+      }
+      for (key in keysdown) {
+        let press = keys.indexOf(key) !== -1;
+        if(!press && keysdown[key]) {
+          keysdown[key] = false;
+          socket.emit('keyup', key);
+          // console.log('keyup', key);
+        } else if(press && !keysdown[key]) {
+          keysdown[key] = true;
+          socket.emit('keydown', key);
+          // console.log('keydown', key);
+        }
+      }
+    }
+}
+
+$(function () {
+  var refreshIntervalId;
+  $("#autopilot").change(function() {
+      if(this.checked) {
+          BOT = true;
+          var refreshIntervalId = setInterval(autopilot, 10);
+      } else {
+          BOT = false;
+          clearInterval(refreshIntervalId);
+      }
+  });
 });
