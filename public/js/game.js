@@ -13,6 +13,7 @@ var state = {
 };
 var players = {};
 var playerCollisionGroup;
+var fields = {};
 
 function create() {
 
@@ -76,6 +77,18 @@ function update() {
       }
     }
 
+    for (let id in state.fields) {
+      let fieldState = state.fields[id];
+      let fieldSprite = getOrCreateField(id, fieldState);
+
+      game.physics.arcade.moveToXY(fieldSprite, fieldState.x, fieldState.y, 30, 30);
+    }
+
+    for (let id in fields) {
+      if (!(id in state.fields)) {
+        removeField(id);
+      }
+    }
 
 }
 
@@ -112,7 +125,6 @@ function getOrCreatePlayer(id, playerState) {
     //  Set the players collision group
     playerSprite.body.setCollisionGroup(playerCollisionGroup);
 
-    // game.camera.follow(player);
     players[id] = playerSprite;
     return playerSprite;
   }
@@ -123,6 +135,37 @@ function removePlayer(id) {
     players[id].destroy();
     delete players[id];
 }
+
+
+
+function getOrCreateField(id, fieldState) {
+  if (id in fields) {
+    return fields[id];
+  } else {
+    fieldSprite = game.add.sprite(fieldState.x, fieldState.y, 'ship');
+    console.log(fieldSprite);
+    fieldSprite.scale.set(2);
+    fieldSprite.smoothed = false;
+    fieldSprite.animations.add('fly', [0,1,2,3,4,5], 10, true);
+    fieldSprite.play('fly');
+
+    game.physics.p2.enable(fieldSprite, false);
+    fieldSprite.body.setCircle(fieldState.radius * 2);
+    fieldSprite.body.fixedRotation = true;
+
+    fields[id] = fieldSprite;
+    return fieldSprite;
+  }
+}
+
+function removeField(id) {
+    fields[id].destroy();
+    delete fields[id];
+}
+
+
+
+
 
 var keysdown = {
   'ArrowUp': false,
