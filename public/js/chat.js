@@ -7,8 +7,11 @@ $(function () {
     return false;
   });
   $('form.message').submit(function(){
-    socket.emit('chat message', $('#message').val());
-    $('#message').val('');
+    var msg = $('#message').val();
+    if (msg) {
+      socket.emit('chat message', msg);
+      $('#message').val('');
+    }
     return false;
   });
   socket.on('set name', function(name){
