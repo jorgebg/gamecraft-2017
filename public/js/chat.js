@@ -1,5 +1,5 @@
 $(function () {
-  $('#message').focus();
+  // $('#message').focus();
   $('form.name').submit(function(){
     socket.emit('set name', $('#name').val());
     $('#name').val('');
@@ -11,11 +11,13 @@ $(function () {
     if (msg) {
       if (msg == '/addbot') {
         addBot();
-      } else if (msg == '/removebot') {
+      } else if (msg == '/kickbot') {
         kickBot();
+      } else {
+        socket.emit('chat message', msg);
       }
-      socket.emit('chat message', msg);
       $('#message').val('');
+      // $('#game').focus();
     }
     return false;
   });

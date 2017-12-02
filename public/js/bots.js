@@ -75,4 +75,5 @@ function addBot() {
 
 function kickBot() {
   var bot = bots.pop();
+  bot.socket.close();
 }
