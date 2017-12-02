@@ -65,6 +65,7 @@ function update() {
       if (playerSprite.text.text != playerState.name) {
         playerSprite.text.text = playerState.name;
       }
+      game.world.bringToTop(playerSprite.text);
       playerSprite.text.x = playerState.x - playerSprite.text.width/2;
       playerSprite.text.y = playerState.y - 48;
     }
@@ -79,7 +80,12 @@ function update() {
 }
 
 function render () {
-
+    var n = 1;
+    for(var id in state.players) {
+      var player = state.players[id];
+      game.debug.text(player.name + ': ' + player.score, 32, n*32);
+      n += 1;
+    }
     // game.debug.text(game.time.physicsElapsed, 32, 32);
     // game.debug.body(player);
     // game.debug.bodyInfo(player, 16, 24);
