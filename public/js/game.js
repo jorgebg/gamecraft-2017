@@ -83,7 +83,9 @@ function update() {
       let fieldSprite = getOrCreateField(id, fieldState);
 
       fieldSprite.scale.set((fieldState.radius * 2)/28);
-      game.physics.arcade.moveToXY(fieldSprite, fieldState.x, fieldState.y, 30, 30);
+      fieldSprite.x = fieldState.x-fieldState.radius;
+      fieldSprite.y = fieldState.y-fieldState.radius;
+      // game.physics.arcade.moveToXY(fieldSprite, fieldState.x, fieldState.y, 30, 30);
     }
 
     for (let id in fields) {
@@ -144,20 +146,21 @@ function getOrCreateField(id, fieldState) {
   if (id in fields) {
     return fields[id];
   } else {
-    fieldSprite = game.add.sprite(fieldState.x, fieldState.y, 'particle_small');
+    var radius = fieldState.radius;
+    fieldSprite = game.add.sprite(fieldState.x-radius, fieldState.y-radius, 'particle_small');
 
     // sprite.body.setSize(width, height, offsetX, offsetY);
     // fieldSprite.scale.setTo(fieldState.radius * 2, fieldState.radius * 2);
 
-    fieldSprite.scale.set((fieldState.radius * 2)/32);
+    fieldSprite.scale.set((radius * 2)/32);
     fieldSprite.smoothed = false;
     // fieldSprite.animations.add('fly', [0,1,2,3,4,5], 10, true);
     // fieldSprite.play('fly');
 
-    game.physics.p2.enable(fieldSprite, false);
-    fieldSprite.body.setCircle(fieldState.radius * 2);
-    fieldSprite.body.fixedRotation = true;
-    fieldSprite.body.collisionResponse = false;
+    // game.physics.p2.enable(fieldSprite, false);
+    // fieldSprite.body.setCircle(fieldState.radius * 2);
+    // fieldSprite.body.fixedRotation = true;
+    // fieldSprite.body.collisionResponse = false;
 
     fields[id] = fieldSprite;
     return fieldSprite;
