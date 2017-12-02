@@ -58,6 +58,9 @@ function create() {
     player.animations.add('turn', [4], 20, true);
     player.animations.add('right', [5, 6, 7, 8], 10, true);
 
+    var style = { font: "12px Arial", fill: "#fff", align: "center"};
+    player.text = game.add.text(0, 0, "Player 1", style);
+
     game.camera.follow(player);
 
     cursors = game.input.keyboard.createCursorKeys();
@@ -76,7 +79,9 @@ function create() {
 }
 
 function update() {
-    game.physics.arcade.moveToXY(player, server.player.x, server.player.y, 200, 50)
+    game.physics.arcade.moveToXY(player, server.player.x, server.player.y, 30, 30);
+    player.text.x = server.player.x;
+    player.text.y = server.player.y - player.height;
     //
     // game.physics.arcade.collide(player, layer);
     //
@@ -136,3 +141,24 @@ function render () {
     // game.debug.bodyInfo(player, 16, 24);
 
 }
+
+
+var keysdown = {
+  'ArrowUp': false,
+  'ArrowLeft': false,
+  'ArrowRight': false,
+};
+
+document.addEventListener('keydown', function(evt) {
+  if(evt.key in keysdown && !(keysdown[evt.key])) {
+    keysdown[evt.key] = true;
+    socket.emit('keydown', evt.key);
+  }
+});
+
+document.addEventListener('keyup', function(evt) {
+  if(evt.key in keysdown && keysdown[evt.key]) {
+    keysdown[evt.key] = false;
+    socket.emit('keyup', evt.key);
+  }
+});
