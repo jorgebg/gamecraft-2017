@@ -4,6 +4,7 @@ var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'game', { preload: preload, 
 function preload() {
     game.load.image('stars', 'assets/starfield.jpg');
     game.load.spritesheet('ship', 'assets/humstar.png', 32, 32);
+    game.load.image('particle_small', 'assets/particle_small.png');
 }
 
 var player;
@@ -81,7 +82,8 @@ function update() {
       let fieldState = state.fields[id];
       let fieldSprite = getOrCreateField(id, fieldState);
 
-      game.physics.arcade.moveToXY(fieldSprite, fieldState.x, fieldState.y, 30, 30);
+      fieldSprite.scale.set((fieldState.radius * 2)/28);
+      // game.physics.arcade.moveToXY(fieldSprite, fieldState.x, fieldState.y, 30, 30);
     }
 
     for (let id in fields) {
@@ -142,16 +144,20 @@ function getOrCreateField(id, fieldState) {
   if (id in fields) {
     return fields[id];
   } else {
-    fieldSprite = game.add.sprite(fieldState.x, fieldState.y, 'ship');
-    console.log(fieldSprite);
-    fieldSprite.scale.set(2);
+    fieldSprite = game.add.sprite(fieldState.x, fieldState.y, 'particle_small');
+
+    // sprite.body.setSize(width, height, offsetX, offsetY);
+    // fieldSprite.scale.setTo(fieldState.radius * 2, fieldState.radius * 2);
+
+    fieldSprite.scale.set((fieldState.radius * 2)/32);
     fieldSprite.smoothed = false;
-    fieldSprite.animations.add('fly', [0,1,2,3,4,5], 10, true);
-    fieldSprite.play('fly');
+    // fieldSprite.animations.add('fly', [0,1,2,3,4,5], 10, true);
+    // fieldSprite.play('fly');
 
     game.physics.p2.enable(fieldSprite, false);
     fieldSprite.body.setCircle(fieldState.radius * 2);
     fieldSprite.body.fixedRotation = true;
+    fieldSprite.body.collisionResponse = false;
 
     fields[id] = fieldSprite;
     return fieldSprite;
