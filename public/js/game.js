@@ -21,6 +21,7 @@ var facing = 'left';
 var jumpTimer = 0;
 var cursors;
 var bg;
+var server;
 
 function create() {
 
@@ -61,58 +62,70 @@ function create() {
 
     cursors = game.input.keyboard.createCursorKeys();
 
+
+    server = {
+      'player': {
+        'x': 0,
+        'y': 100,
+      }
+    }
+    socket.on('position', function(x, y){
+      server.player.x = x;
+      server.player.y = y;
+    });
 }
 
 function update() {
-
-    game.physics.arcade.collide(player, layer);
-
-    player.body.velocity.x = 0;
-
-    if (cursors.left.isDown)
-    {
-        player.body.velocity.x = -150;
-
-        if (facing != 'left')
-        {
-            player.animations.play('left');
-            facing = 'left';
-        }
-    }
-    else if (cursors.right.isDown)
-    {
-        player.body.velocity.x = 150;
-
-        if (facing != 'right')
-        {
-            player.animations.play('right');
-            facing = 'right';
-        }
-    }
-    else
-    {
-        if (facing != 'idle')
-        {
-            player.animations.stop();
-
-            if (facing == 'left')
-            {
-                player.frame = 0;
-            }
-            else
-            {
-                player.frame = 5;
-            }
-
-            facing = 'idle';
-        }
-    }
-
-    if (cursors.up.isDown && player.body.onFloor() && game.time.now > jumpTimer)
-    {
-        player.body.velocity.y = -250;
-        jumpTimer = game.time.now + 750;
-    }
+    game.physics.arcade.moveToXY(player, server.player.x, server.player.y, 200, 50)
+    //
+    // game.physics.arcade.collide(player, layer);
+    //
+    // player.body.velocity.x = 0;
+    //
+    // if (cursors.left.isDown)
+    // {
+    //     player.body.velocity.x = -150;
+    //
+    //     if (facing != 'left')
+    //     {
+    //         player.animations.play('left');
+    //         facing = 'left';
+    //     }
+    // }
+    // else if (cursors.right.isDown)
+    // {
+    //     player.body.velocity.x = 150;
+    //
+    //     if (facing != 'right')
+    //     {
+    //         player.animations.play('right');
+    //         facing = 'right';
+    //     }
+    // }
+    // else
+    // {
+    //     if (facing != 'idle')
+    //     {
+    //         player.animations.stop();
+    //
+    //         if (facing == 'left')
+    //         {
+    //             player.frame = 0;
+    //         }
+    //         else
+    //         {
+    //             player.frame = 5;
+    //         }
+    //
+    //         facing = 'idle';
+    //     }
+    // }
+    //
+    // if (cursors.up.isDown && player.body.onFloor() && game.time.now > jumpTimer)
+    // {
+    //     player.body.velocity.y = -250;
+    //     jumpTimer = game.time.now + 750;
+    // }
 
 }
 

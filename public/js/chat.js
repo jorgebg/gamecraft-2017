@@ -1,5 +1,4 @@
 $(function () {
-  var socket = io();
   $('form.name').submit(function(){
     socket.emit('set name', $('#name').val());
     $('#name').val('');
@@ -14,6 +13,7 @@ $(function () {
     }
     return false;
   });
+  
   socket.on('set name', function(name){
     $('#name').attr('placeholder', name);
   });
