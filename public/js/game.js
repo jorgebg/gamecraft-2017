@@ -83,7 +83,7 @@ function update() {
       let fieldSprite = getOrCreateField(id, fieldState);
 
       fieldSprite.scale.set((fieldState.radius * 2)/28);
-      // game.physics.arcade.moveToXY(fieldSprite, fieldState.x, fieldState.y, 30, 30);
+      game.physics.arcade.moveToXY(fieldSprite, fieldState.x, fieldState.y, 30, 30);
     }
 
     for (let id in fields) {
