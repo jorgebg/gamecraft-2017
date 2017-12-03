@@ -1,3 +1,10 @@
+var player = {
+  'name': 'Player'
+};
+socket.on('set name', function(name){
+  player.name = name;
+});
+
 
 var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'game', { preload: preload, create: create, update: update, render: render });
 
@@ -14,7 +21,6 @@ function preload() {
     game.load.audio('music', 'assets/goaman_intro.mp3');
 }
 
-var player;
 var starfield;
 var state = {
   'players': {},
@@ -119,15 +125,24 @@ function update() {
 }
 
 function render () {
-    var n = 1;
-    for(var id in state.players) {
-      var player = state.players[id];
-      game.debug.text(player.name + ': ' + player.score, 32, n*32);
-      n += 1;
-    }
-    // game.debug.text(game.time.physicsElapsed, 32, 32);
-    // game.debug.body(player);
-    // game.debug.bodyInfo(player, 16, 24);
+  var sortedPlayers = [];
+  for (var id in state.players) {
+    var player = state.players[id];
+    sortedPlayers.push([player.name, player.score]);
+  }
+
+  sortedPlayers.sort(function(a, b) {
+    return b[1] - a[1];
+  });
+
+  var n = 1;
+  for(var player of sortedPlayers) {
+    game.debug.text(player[0] + ': ' + player[1], 32, n*32);
+    n += 1;
+  }
+  // game.debug.text(game.time.physicsElapsed, 32, 32);
+  // game.debug.body(player);
+  // game.debug.bodyInfo(player, 16, 24);
 
 }
 
@@ -192,7 +207,9 @@ function removeField(id) {
     delete fields[id];
 }
 
+/* INPUT */
 
+/* Arrow Keys */
 
 document.addEventListener('keydown', function(evt) {
   if(evt.key in keysdown && !(keysdown[evt.key])) {
@@ -209,3 +226,48 @@ document.addEventListener('keyup', function(evt) {
     socket.emit('keyup', evt.key);
   }
 }, false);
+
+/* Joystick */
+
+$(function() {
+  function resolve(keys) {
+    for (key in keysdown) {
+      let press = keys.indexOf(key) !== -1;
+      if(!press && keysdown[key]) {
+        keysdown[key] = false;
+        socket.emit('keyup', key);
+        // console.log('keyup', key);
+      } else if(press && !keysdown[key]) {
+        keysdown[key] = true;
+        socket.emit('keydown', key);
+        // console.log('keydown', key);
+      }
+    }
+  }
+
+  var joystick = nipplejs.create({
+      zone: document.getElementById('game'),
+      threshold: 0.3,
+  });
+
+  joystick.on('end', function(evt, data) {
+    resolve([]);
+  }).on('move', function(evt, data) {
+    if (!data.direction) {
+      resolve([]);
+    } else {
+      var keys = [];
+      if (data.direction.y == 'up') {
+        keys.push('ArrowUp');
+      } else if (data.direction.y == 'down') {
+        keys.push('ArrowDown');
+      }
+      if (data.direction.x == 'left') {
+        keys.push('ArrowLeft');
+      } else if (data.direction.x == 'right') {
+        keys.push('ArrowRight');
+      }
+      resolve(keys)
+    }
+  });
+});

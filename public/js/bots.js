@@ -4,7 +4,7 @@ function updateBot(bot) {
     let targetField;
     if (bot.targetId in state.fields) {
       targetField = state.fields[bot.targetId];
-    } else {
+    } else if (Math.random() < bot.difficulty) {
       let fieldIds = Object.keys(state.fields);
       bot.targetId = fieldIds[Math.floor(Math.random()*fieldIds.length)];
       targetField = state.fields[bot.targetId];
@@ -19,40 +19,40 @@ function updateBot(bot) {
     //     targetField = fieldState;
     //   }
     // }
-    if (Math.random() < bot.difficulty) {
-      let keys = [];
-      if (targetField) {
-        let threshold = Math.sqrt(targetField.radius);
-        if (targetField.x < botState.x - threshold) {
-          keys.push('ArrowLeft');
-        } else if (targetField.x > botState.x + threshold) {
-          keys.push('ArrowRight');
-        } else {
-          // console.log('STOP X');
-        }
-        if (targetField.y < botState.y - threshold) {
-          keys.push('ArrowUp');
-        } else if (targetField.y > botState.y + threshold) {
-          keys.push('ArrowDown');
-        } else {
-            // console.log('STOP Y');
-        }
+    let keys = [];
+    if (targetField) {
+      let threshold = Math.sqrt(targetField.radius);
+      if (targetField.x < botState.x - threshold) {
+        keys.push('ArrowLeft');
+      } else if (targetField.x > botState.x + threshold) {
+        keys.push('ArrowRight');
+      } else {
+        // console.log('STOP X');
       }
-      for (key in bot.keysdown) {
-        let press = keys.indexOf(key) !== -1;
-        if(!press && bot.keysdown[key]) {
-          bot.keysdown[key] = false;
-          bot.socket.emit('keyup', key);
-          // console.log('keyup', key);
-        } else if(press && !bot.keysdown[key]) {
-          bot.keysdown[key] = true;
-          bot.socket.emit('keydown', key);
-          // console.log('keydown', key);
-        }
+      if (targetField.y < botState.y - threshold) {
+        keys.push('ArrowUp');
+      } else if (targetField.y > botState.y + threshold) {
+        keys.push('ArrowDown');
+      } else {
+          // console.log('STOP Y');
+      }
+    }
+    for (key in bot.keysdown) {
+      let press = keys.indexOf(key) !== -1;
+      if(!press && bot.keysdown[key]) {
+        bot.keysdown[key] = false;
+        bot.socket.emit('keyup', key);
+        // console.log('keyup', key);
+      } else if(press && !bot.keysdown[key]) {
+        bot.keysdown[key] = true;
+        bot.socket.emit('keydown', key);
+        // console.log('keydown', key);
       }
     }
   }
 }
+
+var N_BOTS = 1;
 
 function addBot() {
   var bot = {
@@ -69,7 +69,8 @@ function addBot() {
       updateBot(bot);
     }
   }
-  bot.socket.emit('set name', 'Bot');
+  bot.socket.emit('set name', player.name + ' Bot ' + N_BOTS);
+  N_BOTS++;
   bots.push(bot);
 }
 
