@@ -1,7 +1,7 @@
 {
-  "name": "gamecraft-2017",
+  "name": "humstar-gamecraft-2017",
   "version": "0.0.1",
-  "description": "Gamecraft 2017",
+  "description": "Humstar — GameCraft 2017",
   "dependencies": {
     "express": "^4.16.2",
     "jquery": "^3.2.1",
