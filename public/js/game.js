@@ -8,6 +8,10 @@ function preload() {
     game.load.image('stars', 'assets/starfield.jpg');
     game.load.spritesheet('ship', 'assets/humstar.png', 32, 32);
     game.load.image('particle_small', 'assets/particle_small.png');
+    game.load.audio('squit', 'assets/squit.wav');
+    game.load.audio('lazer', 'assets/lazer.wav');
+    game.load.audio('spaceman', 'assets/spaceman.wav');
+    game.load.audio('music', 'assets/goaman_intro.mp3');
 }
 
 var player;
@@ -25,28 +29,33 @@ var keysdown = {
   'ArrowLeft': false,
   'ArrowRight': false,
 };
+var squit, spaceman, lazer;
 var bots = [];
 
 function create() {
 
     //  Enable P2
-    game.physics.startSystem(Phaser.Physics.P2JS);
+    // game.physics.startSystem(Phaser.Physics.P2JS);
     //  Turn on impact events for the world, without this we get no collision callbacks
-    game.physics.p2.setImpactEvents(true);
+    // game.physics.p2.setImpactEvents(true);
 
-    game.physics.p2.restitution = 0.8;
+    // game.physics.p2.restitution = 0.8;
 
     //  Create our collision groups
-    playerCollisionGroup = game.physics.p2.createCollisionGroup();
+    // playerCollisionGroup = game.physics.p2.createCollisionGroup();
 
     //  This part is vital if you want the objects with their own collision groups to still collide with the world bounds
     //  (which we do) - what this does is adjust the bounds to use its own collision group.
-    game.physics.p2.updateBoundsCollisionGroup();
+    // game.physics.p2.updateBoundsCollisionGroup();
 
     starfield = game.add.tileSprite(0, 0, 800, 600, 'stars');
     starfield.fixedToCamera = true;
 
-
+    squit = game.add.audio('squit', 0.7);
+    lazer = game.add.audio('lazer', 0.02);
+    spaceman = game.add.audio('spaceman', 0.1);
+    music = game.add.audio('music', 0.3, true);
+    music.play();
 
     socket.on('state', function(nextState){
       state = nextState;
@@ -56,12 +65,15 @@ function create() {
 function update() {
     var playerSprite;
     var playerState;
+    var overlaps = false;
 
     for (let id in state.players) {
       let playerState = state.players[id];
       let playerSprite = getOrCreatePlayer(id, playerState);
 
-      game.physics.arcade.moveToXY(playerSprite, playerState.x, playerState.y, 30, 30);
+      // game.physics.arcade.moveToXY(playerSprite, playerState.x, playerState.y, 30, 30);
+      playerSprite.x = playerState.x - playerSprite.width/2;
+      playerSprite.y = playerState.y - playerSprite.height/2;
       // game.physics.arcade.moveToXY(player.text, server.player.x, server.player.y - player.height, 30, 30);
       if (playerSprite.text.text != playerState.name) {
         playerSprite.text.text = playerState.name;
@@ -69,6 +81,13 @@ function update() {
       game.world.bringToTop(playerSprite.text);
       playerSprite.text.x = playerState.x - playerSprite.text.width/2;
       playerSprite.text.y = playerState.y - 48;
+      // console.log(playerState.overlaps);
+      if(playerState.overlaps) {
+        overlaps = true;
+      }
+    }
+    if (overlaps && !lazer.isPlaying) {
+      lazer.play();
     }
 
     for (let id in players) {
@@ -122,15 +141,15 @@ function getOrCreatePlayer(id, playerState) {
     playerSprite.animations.add('fly', [0,1,2,3,4,5], 10, true);
     playerSprite.play('fly');
 
-    game.physics.p2.enable(playerSprite, false);
-    playerSprite.body.setCircle(28);
-    playerSprite.body.fixedRotation = true;
+    // game.physics.p2.enable(playerSprite, false);
+    // playerSprite.body.setCircle(28);
+    // playerSprite.body.fixedRotation = true;
 
     var style = { font: "12px Arial", fill: "#fff", align: "center"};
     playerSprite.text = game.add.text(0, 0, playerState.name, style);
 
     //  Set the players collision group
-    playerSprite.body.setCollisionGroup(playerCollisionGroup);
+    // playerSprite.body.setCollisionGroup(playerCollisionGroup);
 
     players[id] = playerSprite;
     return playerSprite;
@@ -160,6 +179,7 @@ function getOrCreateField(id, fieldState) {
     // fieldSprite.smoothed = false;
 
     game.add.tween(fieldSprite).to( { alpha: 1 }, 500, Phaser.Easing.Linear.None, true);
+    // spaceman.play();
 
     fields[id] = fieldSprite;
     return fieldSprite;
@@ -167,6 +187,7 @@ function getOrCreateField(id, fieldState) {
 }
 
 function removeField(id) {
+    squit.play();
     fields[id].destroy();
     delete fields[id];
 }
