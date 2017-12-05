@@ -9,10 +9,17 @@ $(function () {
   $('form.message').submit(function(){
     var msg = $('#message').val();
     if (msg) {
-      if (msg == '/addbot') {
-        addBot();
-      } else if (msg == '/kickbot') {
-        kickBot();
+      var cmd;
+      if (cmd = msg.match(/\/addbot(?:\s+(\d+))?/)) {
+        var n = Number(cmd[1]) || 1;
+        for (var i=0; i<n; i++) {
+          addBot();
+        }
+      } else if (cmd = msg.match(/\/kickbot(?:\s+(\d+))?/)) {
+        var n = Number(cmd[1]) || 1;
+        for (var i=0; i<n; i++) {
+          kickBot();
+        }
       } else {
         socket.emit('chat message', msg);
       }

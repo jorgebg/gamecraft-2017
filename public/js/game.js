@@ -107,8 +107,8 @@ function update() {
       let fieldSprite = getOrCreateField(id, fieldState);
 
       fieldSprite.scale.set((fieldState.radius * 2)/28);
-      fieldSprite.x = fieldState.x-fieldState.radius;
-      fieldSprite.y = fieldState.y-fieldState.radius;
+      fieldSprite.x = fieldState.x - fieldState.radius;
+      fieldSprite.y = fieldState.y - fieldState.radius;
       // game.physics.arcade.moveToXY(fieldSprite, fieldState.x, fieldState.y, 30, 30);
       game.world.bringToTop(fieldSprite);
     }

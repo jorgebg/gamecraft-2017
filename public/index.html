@@ -13,26 +13,28 @@
 			gtag('config', 'UA-19120546-12');
 		</script>
 
-    <script src="/node_modules/socket.io-client/dist/socket.io.js"></script>
-    <script src="/node_modules/jquery/dist/jquery.js"></script>
-    <script src="/node_modules/phaser/build/phaser.js"></script>
-    <script src="/node_modules/nipplejs/dist/nipplejs.js"></script>
-    <script src="/js/socket.js"></script>
-    <script src="/js/game.js"></script>
-    <script src="/js/bots.js"></script>
-    <script src="/js/chat.js"></script>
+    <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
+    <script src="node_modules/jquery/dist/jquery.js"></script>
+    <script src="node_modules/phaser/build/phaser.js"></script>
+    <script src="node_modules/nipplejs/dist/nipplejs.js"></script>
+    <script>
+			var socket = io();
+		</script>
+    <script src="js/game.js"></script>
+    <script src="js/bots.js"></script>
+    <script src="js/chat.js"></script>
     <style type="text/css">
-	      * { margin: 0; padding: 0; box-sizing: border-box; }
-	      body { font: 13px Helvetica, Arial; }
-	      #chat { background: #000; padding: 3px; width: 800px;}
-				#chat form { display: inline; }
-				#chat form input { border: 0; padding: 10px; margin-right: .5%; }
-	      #chat form.name input { width: 20%; }
-	      #chat form.message input { width: 75%; }
-	      #messages { list-style-type: none; margin: 0; padding: 0; height: 100px; width: 800px; overflow:scroll;}
-	      #messages li { padding: 5px 10px; }
-	      #messages li:nth-child(odd) { background: #eee; }
-	      #messages { margin-bottom: 40px }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      #chat { background: #000; padding: 3px; width: 800px;}
+			#chat form { display: inline; }
+			#chat form input { border: 0; padding: 10px; margin-right: .5%; }
+      #chat form.name input { width: 20%; }
+      #chat form.message input { width: 75%; }
+      #messages { list-style-type: none; margin: 0; padding: 0; height: 100px; width: 800px; overflow:scroll;}
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+      #messages { margin-bottom: 40px }
     </style>
 </head>
 <body>

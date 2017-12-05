@@ -56,7 +56,7 @@ var N_BOTS = 1;
 
 function addBot() {
   var bot = {
-    'socket': io(),
+    'socket': io(socket.io.uri),
     'targetId': false,
     'difficulty': 0.1,
     'keysdown': {
